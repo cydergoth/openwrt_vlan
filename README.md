@@ -64,6 +64,18 @@ connection to my personal PC, and vice versa. In the event that one of
 them became infected by a virus, then the other would be isolated from
 it thus limiting the "spash damage" of the infection.
 
+VLan ports appear under linux as a virtual port `.x` after the
+ethernet port number, e.g. `eth0.2` is VLan 2 on port `eth0`. A packet
+without a VLan tag sent to `eth0.2` will automatically be tagged with
+VLan ID 2 then exit physical port `eth0`, and a packet received on
+port `eth0` with a VLan ID tag of 2 will exit `eth0.2`.
+
+Physical ports like `eth0` with multiple VLan ports are called "VLan
+trunks" and are often used between routers or switches. This is how
+VLans are preserved across my network of the gateway (SFF), WiFi AP
+and managed switches as their interconnections are configured as VLan
+trunks.
+
 ### What is a VPN?
 
 A VPN is a different form of Virtual Private Network. Like a VLan it
@@ -525,6 +537,71 @@ root@LEDE:/etc/hotplug.d/iface# cat 99-google
     /sbin/ip link set eth0.2 type vlan id 2 egress 0:3
 }
 ```
+
+### Switch Configuration
+
+I have two managed switches in my network, one downstairs (#1) and one
+upstairs (#2). The first switch #1 has one port connected to the SFF
+Gateway port `eth3`, and that port is configured as a VLan Trunk port
+on both sides. The second switch is connected to port 8 of the first,
+although I could have used a port on the SFF gateway this was slightly
+more convenient for me.
+
+Remember, VLan-2 is reserved for Google uplink.
+
+So the configuration on that switch is as follows:
+
+Port|VLans
+----------
+1|1,3,4,5 - Uplink VLan trunk to gateway `eth3` 
+2|3 - Guest
+3|4 - IOT - Solar Power controller
+4|4 - IOT - Switch TV
+...|...
+7|1 - LAN
+8|1,3,4,5 - Downlink VLAN trunk to switch #2
+
+Switch #2 is configured similarly with Port 1 being it's uplink switch
+#1
+
+### WiFi AP configuration
+
+The WiFi Access Point I use (Netgear Nighthawk X4S R7800) is a very
+sophisticated and expensive piece of equipment. Needless to say, I
+violated the warranty immediately.
+
+This device has a [Dual core ARMv7 processor at the heart, 512M of RAM
+and 128M of flash](https://openwrt.org/toh/netgear/r7800). It is a
+beast! It is also extremely well supported by OpenWRT. Once very nice
+feature is a built in fallback mode which makes it very easy to
+recover if you "brick" it during flashing OpenWRT.
+
+In addition to the core CPU, it has a dual band WiFi radio and an
+internal/external 1G switch with 4 external ports, 2 CPU ports and a
+WAN uplink port. The WiFi radios are attached to the CPU internal PCI
+bus.
+
+As per the switch configuration on the managed switches, the "WAN"
+port on the Netgear is configured as a VLan trunk port and is attached
+to the `eth1` port on the gateway SFF.
+
+It is configured with multiple SSIDs, one per VLan. Each SSID tags the
+packets with the corresponding VLan ID as it is bridged with the
+corresponding VLan virtual port on the uplink trunk connector. For
+example, Guest SSID is configured to be bridged to `eth0.3` where
+`eth0` is the WAN port connected to the gateway. So the gateway will
+see any WiFi client connected to "Guest" SSID as VLan 3.
+
+All traffic is routed to the gateway so that I can keep my firewall
+rules centralized.
+
+
+
+
+
+
+
+
 
 
 
