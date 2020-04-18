@@ -328,9 +328,14 @@ Notes:
 
 #### Firewall configuration
 
-[Gateway GUI showing Firewall Zones](images/gateway-luci-firewall.png)
+![Gateway GUI showing Firewall Zones](images/gateway-luci-firewall.png)
 
-```
+Note that the firewall rules between zones prohibit traffic. This is
+overriden by extra rules to ensure that only the correct VLan routes
+are enabled. DHCP is specifically enabled so that all the
+VLans/Subnets may access the DHCP server.
+
+```shell
 root@LEDE:/etc/config# cat firewall
 
 config rule
@@ -354,63 +359,6 @@ config rule
         option src 'wan'
         option proto 'igmp'
         option family 'ipv4'
-        option target 'ACCEPT'
-
-config rule
-        option name 'Allow-DHCPv6'
-        option src 'wan'
-        option proto 'udp'
-        option src_ip 'fc00::/6'
-        option dest_ip 'fc00::/6'
-        option dest_port '546'
-        option family 'ipv6'
-        option target 'ACCEPT'
-
-config rule
-        option name 'Allow-MLD'
-        option src 'wan'
-        option proto 'icmp'
-        option src_ip 'fe80::/10'
-        list icmp_type '130/0'
-        list icmp_type '131/0'
-        list icmp_type '132/0'
-        list icmp_type '143/0'
-        option family 'ipv6'
-        option target 'ACCEPT'
-
-config rule
-        option name 'Allow-ICMPv6-Input'
-        option src 'wan'
-        option proto 'icmp'
-        list icmp_type 'echo-request'
-        list icmp_type 'echo-reply'
-        list icmp_type 'destination-unreachable'
-        list icmp_type 'packet-too-big'
-        list icmp_type 'time-exceeded'
-        list icmp_type 'bad-header'
-        list icmp_type 'unknown-header-type'
-        list icmp_type 'router-solicitation'
-        list icmp_type 'neighbour-solicitation'
-        list icmp_type 'router-advertisement'
-        list icmp_type 'neighbour-advertisement'
-        option limit '1000/sec'
-        option family 'ipv6'
-        option target 'ACCEPT'
-
-config rule
-        option name 'Allow-ICMPv6-Forward'
-        option src 'wan'
-        option dest '*'
-        option proto 'icmp'
-        list icmp_type 'echo-request'
-        list icmp_type 'echo-reply'
-        list icmp_type 'destination-unreachable'
-        list icmp_type 'packet-too-big'
-        list icmp_type 'time-exceeded'
-        list icmp_type 'bad-header'
-        list icmp_type 'unknown-header-type'
-        option limit '1000/sec'
-        option family 'ipv6'
         option target 'ACCEPT'
 
 config rule
