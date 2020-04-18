@@ -23,7 +23,7 @@ brick your router or lock yourself out!
 If you are not interested in advanced home networking, or you lack
 computer skills this guide probably isn't for you.
 
-## What is OpenWRT?
+### What is OpenWRT?
 
 [OpenWRT](https://openwrt.org/) is a suite of tooling and packages
 which allow you to replace stock firmware on a commerical home or soho
@@ -43,7 +43,11 @@ hardware.
 OpenWRT supports an optional GUI called "LUCI" which although not
 required, makes it somewhat easier to understand complex setups.
 
-## What is a VLan and why do I care?
+For a brief time OpenWRT was known as LEDE, and sometimes you will see
+that name in this guide. At the time of writing I am using `19.07.1`
+of OpenWRT.
+
+### What is a VLan and why do I care?
 
 A VLan is a Virtual Network (Software defined network) running on top
 of your physical network layer. VLan packets are normal Internet
@@ -60,7 +64,7 @@ connection to my personal PC, and vice versa. In the event that one of
 them became infected by a virus, then the other would be isolated from
 it thus limiting the "spash damage" of the infection.
 
-## What is a VPN?
+### What is a VPN?
 
 A VPN is a different form of Virtual Private Network. Like a VLan it
 is a software defined overlay network, but unlike VLans it uses
@@ -126,7 +130,9 @@ The next component in my home LAN is a 1G x 8 managed switch. Mine are similar t
 by Amazon.com](https://www.amazon.com/dp/B07PLFCQVK/ref=cm_sw_em_r_mt_dp_U_B0ZMEb3T0PQNG)
 
 The important characteristics to note are the switch MUST be "managed"
-and MUST support "Basic VLAN & QoS"
+and MUST support "Basic VLAN & QoS". These switches are also available
+with Power-Over-Ethernet (PoE) which is particularly useful for
+devices like security cameras, or can power a Raspberry Pi 4 computer.
 
 I have two of these, and I will explain the configuration below.
 
@@ -149,6 +155,428 @@ use the built-in firmware upgrade function to replace the firmware
 with OpenWRT. This was an extremely easy and quick process. As a
 bonus, I can use one of the onboard USB ports to power the
 fiber-to-ethernet converter and get rid of a wall-wart.
+
+### Uninterruptable Power Supplies
+
+It is important in the region I am in to have an Uninterruptable Power
+Supply (UPS). All of my routers and switches and my main PC are all on
+UPS. This allows me to continue working during short power outages,
+protects the equipment from surges, and allows for a controlled
+shutdown for longer outages.
+
+## Configuration
+
+My desired configuration is to have multiple VLans in the house, each of which is isolated from the others.
+
+* VLan-2 is required by Google for the upstream link. All packets exiting the SFF router to the fiber-to-ethernet adapter are required to be tagged with VLan-2, QoS-3
+* VLan-3 is my guest network. Devices on this network may only access the internet and not devices on the other VLans.
+* VLan-4 is my Internet-of-Things (IoT) network. This is where I put all of my devices like Nest Thermostats, Security Cameras etc.
+* VLan-5 is my work network, where my corporate provided Macbook lives
+
+Although IPv6 is enabled on my configuration, I will keep this configuration to IPv4 only for simplicity.
+
+Each VLan also has corresponding WiFi SSID on the B and G wavelengths
+on the WiFi access point. Whilst it is possible to also run a WiFi AP
+signon page, my guest network uses a WiFi password which is known to
+my friends.
+
+### Firewall/Internet Gateway Router configuration
+
+#### Core configuration
+
+The ethernet port mapping and network configuration is as follows:
+
+![Gateway GUI Showing VLans](images/gateway-luci-vlans.png)
+
+```shell
+root@LEDE:/etc/config# cat system
+
+config system
+        option hostname 'LEDE'
+        option timezone 'UTC'
+        option ttylogin '0'
+        option log_size '64'
+        option urandom_seed '0'
+
+config timeserver 'ntp'
+        option enabled '1'
+        option enable_server '0'
+        list server '0.lede.pool.ntp.org'
+        list server '1.lede.pool.ntp.org'
+        list server '2.lede.pool.ntp.org'
+        list server '3.lede.pool.ntp.org'
+	
+root@LEDE:/etc/config# cat network
+
+config interface 'loopback'
+        option ifname 'lo'
+        option proto 'static'
+        option ipaddr '127.0.0.1'
+        option netmask '255.0.0.0'
+
+config interface 'lan'
+        option type 'bridge'
+        option proto 'static'
+        option netmask '255.255.255.0'
+        option _orig_ifname 'eth0'
+        option _orig_bridge 'true'
+        option ipaddr '192.168.4.1'
+        option ifname 'eth1 eth3.1'
+
+config interface 'google'
+        option proto 'dhcp'
+        option ifname 'eth0.2'
+
+config interface 'guest'
+        option proto 'static'
+        option ipaddr '192.168.3.1'
+        option netmask '255.255.255.0'
+        option ifname 'eth3.3'
+
+config interface 'iot'
+        option proto 'static'
+        option ipaddr '192.168.6.1'
+        option netmask '255.255.255.0'
+        option ifname 'eth3.4'
+
+config interface 'work'
+        option proto 'static'
+        option ifname 'eth3.5'
+        option ipaddr '192.168.2.1'
+        option netmask '255.255.255.0'
+
+root@LEDE:/etc/config# cat dhcp
+
+config dnsmasq
+        option domainneeded '1'
+        option localise_queries '1'
+        option rebind_protection '1'
+        option rebind_localhost '1'
+        option local '/lan/'
+        option domain 'lan'
+        option expandhosts '1'
+        option authoritative '1'
+        option readethers '1'
+        option leasefile '/tmp/dhcp.leases'
+        option resolvfile '/tmp/resolv.conf.auto'
+        option localservice '1'
+        option nonwildcard '0'
+        option serversfile '/tmp/adb_list.overall'
+        list server '8.8.8.8'
+        list server '4.4.4.4'
+
+config dhcp 'lan'
+        option interface 'lan'
+        option leasetime '12h'
+        option ra 'server'
+        option ra_management '1'
+        option start '50'
+        option limit '175'
+
+config dhcp 'wan'
+        option interface 'wan'
+        option ignore '1'
+
+config odhcpd 'odhcpd'
+        option maindhcp '0'
+        option leasefile '/tmp/hosts/odhcpd'
+        option leasetrigger '/usr/sbin/odhcpd-update'
+
+config host
+        option mac '00:D2:6D:9F:A6:92'
+        option ip '192.168.4.202'
+        option name 'msi'
+        option dns '1'
+
+config dhcp 'veth2'
+        option leasetime '12h'
+        option interface 'veth2'
+        option start '90'
+        option limit '99'
+
+config dhcp 'guest'
+        option start '100'
+        option leasetime '12h'
+        option limit '150'
+        option interface 'guest'
+
+config dhcp 'iot'
+        option start '100'
+        option leasetime '12h'
+        option limit '150'
+        option interface 'iot'
+
+config dhcp 'work'
+        option interface 'work'
+        option start '100'
+        option limit '150'
+        option leasetime '12h'
+
+```
+
+Notes:
+
+* Ethernet port `eth1` is the wired lan
+* The WiFi access point is connected to ethernet port `eth3`
+* The `eth1` and `eth3` are in a bridge for the LAN
+* The `eth1` and `eth3` ports are configured as
+  VLan Trunks. This means they support multiple VLans for ingress, and
+  for egress they have VLan virtual interfaces like `eth3.1`
+* The network has several subnets. `192.168.4.1` is the primary lan,
+  but the guest network is on `192.168.3.1`. This allows us to
+  separate them in the firewall.
+
+#### Firewall configuration
+
+[Gateway GUI showing Firewall Zones](images/gateway-luci-firewall.png)
+
+```
+root@LEDE:/etc/config# cat firewall
+
+config rule
+        option name 'Allow-DHCP-Renew'
+        option src 'wan'
+        option proto 'udp'
+        option dest_port '68'
+        option target 'ACCEPT'
+        option family 'ipv4'
+
+config rule
+        option name 'Allow-Ping'
+        option src 'wan'
+        option proto 'icmp'
+        option icmp_type 'echo-request'
+        option family 'ipv4'
+        option target 'ACCEPT'
+
+config rule
+        option name 'Allow-IGMP'
+        option src 'wan'
+        option proto 'igmp'
+        option family 'ipv4'
+        option target 'ACCEPT'
+
+config rule
+        option name 'Allow-DHCPv6'
+        option src 'wan'
+        option proto 'udp'
+        option src_ip 'fc00::/6'
+        option dest_ip 'fc00::/6'
+        option dest_port '546'
+        option family 'ipv6'
+        option target 'ACCEPT'
+
+config rule
+        option name 'Allow-MLD'
+        option src 'wan'
+        option proto 'icmp'
+        option src_ip 'fe80::/10'
+        list icmp_type '130/0'
+        list icmp_type '131/0'
+        list icmp_type '132/0'
+        list icmp_type '143/0'
+        option family 'ipv6'
+        option target 'ACCEPT'
+
+config rule
+        option name 'Allow-ICMPv6-Input'
+        option src 'wan'
+        option proto 'icmp'
+        list icmp_type 'echo-request'
+        list icmp_type 'echo-reply'
+        list icmp_type 'destination-unreachable'
+        list icmp_type 'packet-too-big'
+        list icmp_type 'time-exceeded'
+        list icmp_type 'bad-header'
+        list icmp_type 'unknown-header-type'
+        list icmp_type 'router-solicitation'
+        list icmp_type 'neighbour-solicitation'
+        list icmp_type 'router-advertisement'
+        list icmp_type 'neighbour-advertisement'
+        option limit '1000/sec'
+        option family 'ipv6'
+        option target 'ACCEPT'
+
+config rule
+        option name 'Allow-ICMPv6-Forward'
+        option src 'wan'
+        option dest '*'
+        option proto 'icmp'
+        list icmp_type 'echo-request'
+        list icmp_type 'echo-reply'
+        list icmp_type 'destination-unreachable'
+        list icmp_type 'packet-too-big'
+        list icmp_type 'time-exceeded'
+        list icmp_type 'bad-header'
+        list icmp_type 'unknown-header-type'
+        option limit '1000/sec'
+        option family 'ipv6'
+        option target 'ACCEPT'
+
+config rule
+        option target 'ACCEPT'
+        option src 'wan'
+        option proto 'tcp'
+        option dest_port '22'
+        option name 'External SSH'
+
+config rule
+        option target 'ACCEPT'
+        option src 'guest'
+        option name 'Allow DNS/DHCP for Guest'
+        option dest_port '67 68 53'
+        list proto 'tcp'
+        list proto 'udp'
+
+config defaults
+        option syn_flood '1'
+        option input 'ACCEPT'
+        option output 'ACCEPT'
+        option forward 'REJECT'
+
+config zone
+        option name 'lan'
+        option input 'ACCEPT'
+        option output 'ACCEPT'
+        option forward 'ACCEPT'
+        option network 'lan'
+
+config zone
+        option name 'wan'
+        option input 'REJECT'
+        option output 'ACCEPT'
+        option forward 'REJECT'
+        option masq '1'
+        option mtu_fix '1'
+        option network 'google googlev6'
+
+config include
+        option path '/etc/firewall.user'
+
+config forwarding
+        option dest 'wan'
+        option src 'lan'
+
+config zone
+        option name 'guest'
+        option output 'ACCEPT'
+        option network 'guest'
+        option input 'REJECT'
+        option forward 'REJECT'
+
+config forwarding
+        option dest 'wan'
+        option src 'guest'
+
+config zone
+        option name 'iot'
+        option input 'REJECT'
+        option network 'iot'
+        option output 'ACCEPT'
+        option forward 'REJECT'
+
+config forwarding
+        option dest 'wan'
+        option src 'iot'
+
+config rule
+        option target 'ACCEPT'
+        option name 'Allow DNS/DHCP for IOT'
+        option dest_port '53 67 68'
+        option src 'iot'
+        list proto 'tcp'
+        list proto 'udp'
+
+config zone
+        option name 'work'
+        option input 'REJECT'
+        option output 'ACCEPT'
+        option forward 'REJECT'
+        option network 'work'
+
+config forwarding
+        option src 'work'
+        option dest 'wan'
+
+config rule
+        option name 'Allow DNS/DHCP for Work'
+        option src 'work'
+        option dest_port '53 67 68'
+        option target 'ACCEPT'
+        list proto 'tcp'
+        list proto 'udp'
+
+config include 'miniupnpd'
+        option type 'script'
+        option path '/usr/share/miniupnpd/firewall.include'
+        option family 'any'
+        option reload '1'
+
+```
+
+#### Google Upsteam link
+
+In order to communicate correctly with the Google upstream servers,
+every boot the SFF PC needs to set the VLan and QoS on the network
+interface, in my case `eth0` is the one connected to the Google fiber,
+so I aliased it to `google`.
+
+This script achieves it. You also need to enable the full version of
+the `ip` tool as OpenWRT defaults to a cut-down simpler version. This
+can be done from the LUCI GUI System/Software menu or from the command
+line. I am using SSH to the gateway here, that can also be configured
+in LUCI, I recommend not doing that on the WAN interface at this
+point.
+
+```shell
+root@LEDE:/etc/hotplug.d/iface# opkg update
+Downloading http://downloads.openwrt.org/releases/19.07.1/targets/x86/64/packages/Packages.gz
+Updated list of available packages in /var/opkg-lists/openwrt_core
+Downloading http://downloads.openwrt.org/releases/19.07.1/targets/x86/64/packages/Packages.sig
+Signature check passed.
+Downloading http://downloads.openwrt.org/releases/19.07.1/packages/x86_64/base/Packages.gz
+Updated list of available packages in /var/opkg-lists/openwrt_base
+Downloading http://downloads.openwrt.org/releases/19.07.1/packages/x86_64/base/Packages.sig
+Signature check passed.
+Downloading http://downloads.openwrt.org/releases/19.07.1/packages/x86_64/luci/Packages.gz
+Updated list of available packages in /var/opkg-lists/openwrt_luci
+Downloading http://downloads.openwrt.org/releases/19.07.1/packages/x86_64/luci/Packages.sig
+Signature check passed.
+Downloading http://downloads.openwrt.org/releases/19.07.1/packages/x86_64/packages/Packages.gz
+Updated list of available packages in /var/opkg-lists/openwrt_packages
+Downloading http://downloads.openwrt.org/releases/19.07.1/packages/x86_64/packages/Packages.sig
+Signature check passed.
+Downloading http://downloads.openwrt.org/releases/19.07.1/packages/x86_64/routing/Packages.gz
+Updated list of available packages in /var/opkg-lists/openwrt_routing
+Downloading http://downloads.openwrt.org/releases/19.07.1/packages/x86_64/routing/Packages.sig
+Signature check passed.
+Downloading http://downloads.openwrt.org/releases/19.07.1/packages/x86_64/telephony/Packages.gz
+Updated list of available packages in /var/opkg-lists/openwrt_telephony
+Downloading http://downloads.openwrt.org/releases/19.07.1/packages/x86_64/telephony/Packages.sig
+Signature check passed.
+root@LEDE:/etc/hotplug.d/iface# opkg install ip
+Package ip-full (5.0.0-2.1) installed in root is up to date.
+```
+
+Create the script in the hotplug.d/iface directory and it will be
+executed every time the `google` interface comes up.
+
+```shell
+root@LEDE:/etc# cd hotplug.d/iface/
+root@LEDE:/etc/hotplug.d/iface# ls -l
+-rw-r--r--    1 root     root           155 Jan 29 16:05 00-netstate
+-rw-------    1 root     root           336 Jan 29 16:05 20-firewall
+-rw-r--r--    1 root     root          1618 Feb 11 12:41 20-ntpclient
+-rw-r--r--    1 root     root           990 Feb 20 08:17 50-miniupnpd
+-rwxr-xr-x    1 root     root           204 Feb 11 12:41 95-ddns
+-rwxr-xr-x    1 root     root           220 Feb 17 01:02 99-google
+root@LEDE:/etc/hotplug.d/iface# cat 99-google
+#!/bin/sh
+[ "${ACTION}" = "ifup" -a "${INTERFACE}" = "google" ] && {
+    logger -t hotplug "Device: ${DEVICE} / Action: ${ACTION} google enable performance mode"
+    /sbin/ip link set eth0.2 type vlan id 2 egress 0:3
+}
+```
 
 
 
