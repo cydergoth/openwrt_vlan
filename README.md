@@ -80,11 +80,13 @@ unit/router/wifi and replace it with my own. So that is what I did.
 
 I used a SFF X86 PC similar to this one:
 
+[[https://images-na.ssl-images-amazon.com/images/I/71e%2BCVuYOxL._AC_SL1500_.jpg|SFF PC Image]]
+
 [Protectli Vault 4 Port, Firewall Micro Appliance/Mini PC - Intel Quad Core, AES-NI, 8GB RAM, 120GB mSATA SSD
 by protectli](https://www.amazon.com/dp/B07G9NHRGQ/ref=cm_sw_em_r_mt_dp_U_6MZMEbBEDB98D)
 
 These are sold barebones (no RAM, SSD, or software), populated but
-with software, or often with pfSense. pfSense is an alternative
+without software, or often with pfSense. pfSense is an alternative
 firmware for customized firewalls, and widely regarded as easier to
 use than OpenWRT. As, however, I was partly using this as a learning
 exercise I wanted to use the less friendly version. I also wanted to
@@ -118,6 +120,8 @@ the first part of customization begins (see below).
 
 The next component in my home LAN is a 1G x 8 managed switch. Mine are similar to these
 
+[[https://images-na.ssl-images-amazon.com/images/I/61TAP3WjZyL._AC_SL1500_.jpg|Netgear Managed Switch Image]]
+
 [NETGEAR 8-Port Gigabit Smart Managed Plus Switch (GS308E)
 by Amazon.com](https://www.amazon.com/dp/B07PLFCQVK/ref=cm_sw_em_r_mt_dp_U_B0ZMEb3T0PQNG)
 
@@ -132,6 +136,8 @@ The last component in my home network is a WiFi router. Note that the
 SFF PC does not have WiFI capability. Some do, but don't do it as well
 as commercial ones. I chose my home router very carefully as I wanted
 to ensure that all the components are well supported by OpenWRT.
+
+[[https://images-na.ssl-images-amazon.com/images/I/511vIJ3EhLL._AC_SL1370_.jpg|NETGEAR Nighthawk X4S Smart WiFi Router Image]]
 
 [NETGEAR Nighthawk X4S Smart WiFi Router (R7800) - AC2600 Wireless
 Speed (up to 2600 Mbps) | Up to 2500 sq ft Coverage & 45 Devices | 4 x
