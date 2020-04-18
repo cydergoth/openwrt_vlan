@@ -589,7 +589,11 @@ bus.
 
 As per the switch configuration on the managed switches, the "WAN"
 port on the Netgear is configured as a VLan trunk port and is attached
-to the `eth1` port on the gateway SFF.
+to the `eth1` port on the gateway SFF. Note that in the Gateway bridge
+configuration the `lan` bridge contains the `eth1` port not `eth1.x`,
+so the bridge includes *all* the VLans on `eth1`. This also means that
+the VLan tags are preserved and not stripped like they would be for a
+`ethx.y` interface.
 
 It is configured with multiple SSIDs, one per VLan. Each SSID tags the
 packets with the corresponding VLan ID as it is bridged with the
