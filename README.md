@@ -28,7 +28,7 @@ computer skills this guide probably isn't for you.
 [OpenWRT](https://openwrt.org/) is a suite of tooling and packages
 which allow you to replace stock firmware on a commerical home or soho
 router with a customized version. This is a very good thing if you are
-a profession in the software or IT space, or just have an interest in
+a professional in the software or IT space, or just have an interest in
 leveraging more sophisticated firmware. It is also (despite recently
 found issues) widely regarded as being more secure than default vendor
 firmware as that has been plagued by backdoors, default credentials,
@@ -40,7 +40,7 @@ pre-packaged applications. Part of the toolchain is an "imagebuilder"
 tool which allows you to easily make customized images for your
 hardware.
 
-OpenWRT supports an optional GUI called "LUCI" which although not
+OpenWRT supports an optional GUI called "LuCI" which although not
 required, makes it somewhat easier to understand complex setups.
 
 For a brief time OpenWRT was known as LEDE, and sometimes you will see
