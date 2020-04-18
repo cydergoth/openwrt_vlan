@@ -561,8 +561,14 @@ Port | VLans
 7 | 1 - LAN
 8 | 1,3,4,5 - Downlink VLAN trunk to switch #2
 
-Switch #2 is configured similarly with Port 1 being it's uplink switch
+Switch #2 is configured similarly with Port 1 being its uplink to switch
 #1
+
+Note that any device plugged into a port with a single VLan tag will
+have all its packets tagged with that VLan. This is how non-VLan aware
+devices are introduced into a VLan enabled network. Similarly, as a
+packet tagged with the VLan exits that port, the VLan tag will be
+_removed_ .
 
 ### WiFi AP configuration
 
