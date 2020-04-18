@@ -551,15 +551,15 @@ Remember, VLan-2 is reserved for Google uplink.
 
 So the configuration on that switch is as follows:
 
-Port|VLans
+Port | VLans
 ----------
-1|1,3,4,5 - Uplink VLan trunk to gateway `eth3` 
-2|3 - Guest
-3|4 - IOT - Solar Power controller
-4|4 - IOT - Switch TV
-...|...
-7|1 - LAN
-8|1,3,4,5 - Downlink VLAN trunk to switch #2
+1 | 1,3,4,5 - Uplink VLan trunk to gateway `eth3` 
+2 | 3 - Guest
+3 | 4 - IOT - Solar Power controller
+4 | 4 - IOT - Switch TV
+... | ...
+7 | 1 - LAN
+8 | 1,3,4,5 - Downlink VLAN trunk to switch #2
 
 Switch #2 is configured similarly with Port 1 being it's uplink switch
 #1
