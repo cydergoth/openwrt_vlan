@@ -108,7 +108,7 @@ use than OpenWRT. As, however, I was partly using this as a learning
 exercise I wanted to use the less friendly version. I also wanted to
 use a consistent router OS across my lan (more on this later).
 
-If you buy one, make sure it supports the AWS-NI instructions as they
+If you buy one, make sure it supports the AES-NI instructions as they
 help accelerate some functions like VPNs.
 
 Installing OpenWRT on this box is trivial, boot the box off a USB
