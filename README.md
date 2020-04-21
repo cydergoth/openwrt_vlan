@@ -605,7 +605,7 @@ see any WiFi client connected to "Guest" SSID as VLan 3.
 All traffic is routed to the gateway so that I can keep my firewall
 rules centralized.
 
-## Captain's Log, supplimental
+## Captain's Log, supplemental
 
 One of the more important pieces of software I run on my gateway is
 `banIP`. This package is similar to the popular "fail2ban" package
@@ -625,20 +625,3 @@ ban tables.
 
 It is not installed or configured by default in OpenWRT but may be
 easily applied via the `opkg` command line tool or via LuCI.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
