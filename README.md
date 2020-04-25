@@ -187,10 +187,10 @@ My desired configuration is to have multiple VLans in the house, each of which i
 
 Although IPv6 is enabled on my configuration, I will keep this configuration to IPv4 only for simplicity.
 
-Each VLan also has corresponding WiFi SSID on the B and G wavelengths
-on the WiFi access point. Whilst it is possible to also run a WiFi AP
-signon page, my guest network uses a WiFi password which is known to
-my friends.
+Each VLan also has corresponding WiFi SSID on the 2.4Ghz and 5Ghz
+wavelengths on the WiFi access point. Whilst it is possible to also
+run a WiFi AP signon page, my guest network uses a WiFi password which
+is known to my friends.
 
 ### Firewall/Internet Gateway Router configuration
 
@@ -365,3 +365,5 @@ Here I list some additional configuration I have in my network.
 On the gateway
 
 * [banip](banip.md) A utility to autoban IPs from which multiple login attempts are made
+* [ntpclient](ntpclient.md) Keep your clocks in sync, very useful for log aggregation
+
