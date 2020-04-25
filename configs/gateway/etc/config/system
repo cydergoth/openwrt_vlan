@@ -1,0 +1,53 @@
+config system
+        option hostname 'LEDE'
+        option timezone 'UTC'
+        option ttylogin '0'
+        option log_size '64'
+        option urandom_seed '0'
+
+config timeserver 'ntp'
+        option enabled '1'
+        option enable_server '0'
+        list server '0.lede.pool.ntp.org'
+        list server '1.lede.pool.ntp.org'
+        list server '2.lede.pool.ntp.org'
+        list server '3.lede.pool.ntp.org'
+	
+root@LEDE:/etc/config# cat network
+
+config interface 'loopback'
+        option ifname 'lo'
+        option proto 'static'
+        option ipaddr '127.0.0.1'
+        option netmask '255.0.0.0'
+
+config interface 'lan'
+        option type 'bridge'
+        option proto 'static'
+        option netmask '255.255.255.0'
+        option _orig_ifname 'eth0'
+        option _orig_bridge 'true'
+        option ipaddr '192.168.4.1'
+        option ifname 'eth1 eth3.1'
+
+config interface 'google'
+        option proto 'dhcp'
+        option ifname 'eth0.2'
+
+config interface 'guest'
+        option proto 'static'
+        option ipaddr '192.168.3.1'
+        option netmask '255.255.255.0'
+        option ifname 'eth3.3'
+
+config interface 'iot'
+        option proto 'static'
+        option ipaddr '192.168.6.1'
+        option netmask '255.255.255.0'
+        option ifname 'eth3.4'
+
+config interface 'work'
+        option proto 'static'
+        option ifname 'eth3.5'
+        option ipaddr '192.168.2.1'
+        option netmask '255.255.255.0'

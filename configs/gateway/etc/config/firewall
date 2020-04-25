@@ -1,0 +1,122 @@
+
+config rule
+        option name 'Allow-DHCP-Renew'
+        option src 'wan'
+        option proto 'udp'
+        option dest_port '68'
+        option target 'ACCEPT'
+        option family 'ipv4'
+
+config rule
+        option name 'Allow-Ping'
+        option src 'wan'
+        option proto 'icmp'
+        option icmp_type 'echo-request'
+        option family 'ipv4'
+        option target 'ACCEPT'
+
+config rule
+        option name 'Allow-IGMP'
+        option src 'wan'
+        option proto 'igmp'
+        option family 'ipv4'
+        option target 'ACCEPT'
+
+config rule
+        option target 'ACCEPT'
+        option src 'wan'
+        option proto 'tcp'
+        option dest_port '22'
+        option name 'External SSH'
+
+config rule
+        option target 'ACCEPT'
+        option src 'guest'
+        option name 'Allow DNS/DHCP for Guest'
+        option dest_port '67 68 53'
+        list proto 'tcp'
+        list proto 'udp'
+
+config defaults
+        option syn_flood '1'
+        option input 'ACCEPT'
+        option output 'ACCEPT'
+        option forward 'REJECT'
+
+config zone
+        option name 'lan'
+        option input 'ACCEPT'
+        option output 'ACCEPT'
+        option forward 'ACCEPT'
+        option network 'lan'
+
+config zone
+        option name 'wan'
+        option input 'REJECT'
+        option output 'ACCEPT'
+        option forward 'REJECT'
+        option masq '1'
+        option mtu_fix '1'
+        option network 'google googlev6'
+
+config include
+        option path '/etc/firewall.user'
+
+config forwarding
+        option dest 'wan'
+        option src 'lan'
+
+config zone
+        option name 'guest'
+        option output 'ACCEPT'
+        option network 'guest'
+        option input 'REJECT'
+        option forward 'REJECT'
+
+config forwarding
+        option dest 'wan'
+        option src 'guest'
+
+config zone
+        option name 'iot'
+        option input 'REJECT'
+        option network 'iot'
+        option output 'ACCEPT'
+        option forward 'REJECT'
+
+config forwarding
+        option dest 'wan'
+        option src 'iot'
+
+config rule
+        option target 'ACCEPT'
+        option name 'Allow DNS/DHCP for IOT'
+        option dest_port '53 67 68'
+        option src 'iot'
+        list proto 'tcp'
+        list proto 'udp'
+
+config zone
+        option name 'work'
+        option input 'REJECT'
+        option output 'ACCEPT'
+        option forward 'REJECT'
+        option network 'work'
+
+config forwarding
+        option src 'work'
+        option dest 'wan'
+
+config rule
+        option name 'Allow DNS/DHCP for Work'
+        option src 'work'
+        option dest_port '53 67 68'
+        option target 'ACCEPT'
+        list proto 'tcp'
+        list proto 'udp'
+
+config include 'miniupnpd'
+        option type 'script'
+        option path '/usr/share/miniupnpd/firewall.include'
+        option family 'any'
+        option reload '1'

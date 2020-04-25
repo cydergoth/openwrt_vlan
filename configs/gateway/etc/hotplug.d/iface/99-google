@@ -1,0 +1,5 @@
+#!/bin/sh
+[ "${ACTION}" = "ifup" -a "${INTERFACE}" = "google" ] && {
+    logger -t hotplug "Device: ${DEVICE} / Action: ${ACTION} google enable performance mode"
+    /sbin/ip link set eth0.2 type vlan id 2 egress 0:3
+}
