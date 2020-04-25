@@ -24,7 +24,7 @@ easily applied via the `opkg` command line tool or via LuCI.
 
 My config is available:
 
-* [banip config](configs/etc/gateway/config/banip)
+* [banip config](configs/gateway/etc/config/banip)
 
 Note: In order for banIP to work, the utilities it watches must have
 their log files enabled.
