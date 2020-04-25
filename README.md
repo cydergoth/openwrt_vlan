@@ -360,21 +360,8 @@ rules centralized.
 
 ## Captain's Log, supplemental
 
-One of the more important pieces of software I run on my gateway is
-`banIP`. This package is similar to the popular "fail2ban" package
-many other systems use. The role it performs is to monitor the log
-files for suspicious activity - in this case determined as multiple
-failed SSH login attempts - on the external interface (`google`)
+Here I list some additional configuration I have in my network.
 
-Once it sees one, it adds that address to a 'blacklist' of IPs.
+On the gateway
 
-![Blacklist](images/gateway-luci-banip-blacklist.png)
-
-In addition to this auto-generated list of potential threats, it may
-also use one or more of a number of curated lists to pre-populate the
-ban tables.
-
-![Blacklist](images/gateway-luci-banip-sources.png)
-
-It is not installed or configured by default in OpenWRT but may be
-easily applied via the `opkg` command line tool or via LuCI.
+* [banip](banip.md) A utility to autoban IPs from which multiple login attempts are made
