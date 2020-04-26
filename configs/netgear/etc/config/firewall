@@ -1,0 +1,25 @@
+
+config defaults
+	option syn_flood '1'
+	option input 'ACCEPT'
+	option output 'ACCEPT'
+	option forward 'REJECT'
+	option flow_offloading '1'
+	option flow_offloading_hw '1'
+
+config forwarding
+	option src 'lan'
+	option dest 'wan'
+
+config include
+	option path '/etc/firewall.user'
+
+config rule
+	option dest '*'
+	option name 'Upstream'
+	option target 'ACCEPT'
+
+config rule
+	option target 'ACCEPT'
+	option src '*'
+

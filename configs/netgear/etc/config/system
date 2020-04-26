@@ -1,0 +1,43 @@
+
+config system
+	option ttylogin '0'
+	option log_size '64'
+	option urandom_seed '0'
+	option zonename 'America/Chicago'
+	option cronloglevel '5'
+	option log_proto 'udp'
+	option conloglevel '8'
+	option timezone 'CST6CDT,M3.2.0,M11.1.0'
+	option hostname 'Netgear'
+
+config timeserver 'ntp'
+	list server '0.openwrt.pool.ntp.org'
+	list server '1.openwrt.pool.ntp.org'
+	list server '2.openwrt.pool.ntp.org'
+	list server '3.openwrt.pool.ntp.org'
+
+config led 'led_usb1'
+	option name 'USB 1'
+	option sysfs 'r7800:white:usb1'
+	option trigger 'usbport'
+	list port 'usb1-port1'
+	list port 'usb2-port1'
+
+config led 'led_usb2'
+	option name 'USB 2'
+	option sysfs 'r7800:white:usb2'
+	option trigger 'usbport'
+	list port 'usb3-port1'
+	list port 'usb4-port1'
+
+config led 'led_wan'
+	option name 'WAN'
+	option sysfs 'r7800:white:wan'
+	option trigger 'switch0'
+	option port_mask '0x20'
+
+config led 'led_esata'
+	option name 'eSATA'
+	option sysfs 'r7800:white:esata'
+	option trigger 'ide-disk'
+

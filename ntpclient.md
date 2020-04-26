@@ -1,6 +1,7 @@
 # NTP Client
 
-NTP Client runs on the router, and is installed via LuCI or the `opkg` command line.
+NTP Client runs on the gateway and WiFi access point, and is installed
+via LuCI or the `opkg` command line.
 
 There are two packages which can be installed
 

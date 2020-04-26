@@ -1,0 +1,64 @@
+
+config interface 'loopback'
+	option ifname 'lo'
+	option proto 'static'
+	option ipaddr '127.0.0.1'
+	option netmask '255.0.0.0'
+
+config globals 'globals'
+	option ula_prefix 'fd55:eb08:e0e7::/48'
+
+config switch
+	option name 'switch0'
+	option reset '1'
+	option enable_vlan '1'
+
+config interface 'wifi0'
+	option proto 'static'
+	option netmask '255.255.255.0'
+	option ipaddr '192.168.5.1'
+
+config switch_vlan
+	option device 'switch0'
+	option vlan '1'
+	option vid '1'
+	option ports '0t 5t'
+
+config interface 'lan'
+	option proto 'dhcp'
+	option type 'bridge'
+	option ifname 'eth0.1'
+
+config interface 'guest'
+	option type 'bridge'
+	option proto 'dhcp'
+	option ifname 'eth0.3'
+
+config switch_vlan
+	option device 'switch0'
+	option vlan '2'
+	option ports '0t 5t'
+	option vid '3'
+
+config interface 'iot'
+	option proto 'dhcp'
+	option type 'bridge'
+	option ifname 'eth0.4'
+
+config switch_vlan
+	option device 'switch0'
+	option vlan '3'
+	option ports '0t 5t'
+	option vid '4'
+
+config interface 'work'
+	option type 'bridge'
+	option ifname 'eth0.5'
+	option proto 'dhcp'
+
+config switch_vlan
+	option device 'switch0'
+	option vlan '4'
+	option ports '0t 5t'
+	option vid '5'
+
