@@ -363,6 +363,7 @@ see any WiFi client connected to "Guest" SSID as VLan 3.
 
 
 * [Network config](configs/netgear/etc/config/network)
+* [Wireless config](configs/netgear/etc/config/wireless)
 
 All traffic is routed to the gateway so that I can keep my firewall
 rules centralized.
