@@ -348,7 +348,9 @@ so the bridge includes *all* the VLans on `eth1`. This also means that
 the VLan tags are preserved and not stripped like they would be for a
 `ethx.y` interface.
 
-[Switch config](configs/netgear/etc/config/switch)
+![Switch config luci](images/netgear-luci-switch.png) 
+
+[Switch config](configs/netgear/etc/config/network)
 
 It is configured with multiple SSIDs, one per VLan. Each SSID tags the
 packets with the corresponding VLan ID as it is bridged with the
@@ -357,7 +359,9 @@ example, Guest SSID is configured to be bridged to `eth0.3` where
 `eth0` is the WAN port connected to the gateway. So the gateway will
 see any WiFi client connected to "Guest" SSID as VLan 3.
 
-* ![Netgear SSIDs](images/netgear-luci-ssid.png)
+![Netgear SSIDs](images/netgear-luci-ssid.png)
+
+
 * [Network config](configs/netgear/etc/config/network)
 
 All traffic is routed to the gateway so that I can keep my firewall
